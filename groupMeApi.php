@@ -15,7 +15,7 @@
 			*  
 			*  @return 	(string)	The result of the curl POST
 			*  
-		*/
+    */
 		public function apiPost($url,$data=array()) {
 			$ch = curl_init($url);
 			if(empty($data['file'])) {
@@ -24,14 +24,14 @@
 				'Content-Type: application/json',
 				'Content-Length: ' . strlen($data))
 				);
-			}
+      }
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
 			
 			$c = curl_exec($ch);
 			return $c;
-		}
+    }
 		
 		/**
 			*  Curl GET
@@ -40,7 +40,7 @@
 			*  
 			*  @return 	(string)	The result of the curl GET
 			*  
-		*/
+    */
 		public function apiGet($url) {
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
@@ -50,7 +50,7 @@
 			);
 			$c = curl_exec($ch);
 			return $c;
-		}
+    }
 		
 		/**
 			*  Post a message from a bot to a group
@@ -64,27 +64,27 @@
 			*  @return 					Status 201 (Created)
 			*  								No return from this endpoint.
 			*
-		*/
+    */
 		public function botPost($groupId,$strBotId,$strMessage,$pictureUrl = false) {
 			if (($strMessage == false) && ($pictureUrl == false)) {
 				return false;
-			}
+      }
 			if (empty($pictureUrl) === false){
 				if (stripos($pictureUrl,"i.groupme.com") === false) {
 					// Upload image URL to the GroupMe image service and use that URL instead
 					$pictureUrl = $this->uploadImage($pictureUrl);
-				}
+        }
 				$arrPayload["attachments"][] = array(
 				"type" => "image",
 				"url" => $pictureUrl
 				);
-			}		
+      }		
 			$arrPayload["bot_id"] 	= $strBotId;
 			$arrPayload["text"] 		= $strMessage;
 			
 			$postUrl = $this->baseUrl."/bots/post?token={$this->token}";
 			return $this->apiPost($postUrl,$arrPayload);
-		}
+    }
 		
 		/**
 			*  Add user(s) to a group
@@ -131,16 +131,16 @@
 			*			OR returns the results of a call to /members/results using the results_id from /members/add using $this->groupAddUserResults()
 			*		
 			*  
-		*/		
+    */		
 		public function groupAddUser($groupId,$userIdsToAdd,$boolGetResult = false) {
 			$postUrl = $this->baseUrl."/groups/{$groupId}/members/add?token={$this->token}";
 			$r = $this->apiPost($postUrl,$userIdsToAdd);
 			$r = json_decode($r,true);
 			if ($boolGetResult) {
 				return $this->groupAddUserResults($groupId,$r['response']['results_id']);
-			}
+      }
 			return $r;
-		}
+    }
 		
 		/**
 			*  Brief
@@ -151,12 +151,12 @@
 			*  @return 	Returns an array detailing the results of the /members/add call. 
 			*				More info on the return here: https://dev.groupme.com/docs/v3#members_results
 			*  
-		*/
+    */
 		public function groupAddUserResults($groupId,$resultsId) {
 			sleep(1); // necessary to let GroupMe do the adding. The results won't exist yet without it (returns 503)
 			$postUrl = $this->baseUrl."/groups/{$groupId}/members/results/".$resultsId."?token={$this->token}";
 			return $this->apiGet($postUrl);
-		}		
+    }		
 		
 		/**
 			*  Remove a user from a group
@@ -167,7 +167,7 @@
 			*  @return 				Status: 200 OK
 			*								There is no return from this endpoint.
 			*  
-		*/
+    */
 		public function groupRemoveUser($groupId,$userId) {
 			// Get the user's memberId from their userId
 			$memberId = $this->getMemberId($groupId,$userId);
@@ -175,7 +175,7 @@
 			// Remove the user using memberId
 			$postUrl = $this->baseUrl."/groups/{$groupId}/members/".$memberId."/remove?token={$this->token}";
 			return $this->apiPost($postUrl);
-		}
+    }
 		
 		/**
 			*  Create a new bot.
@@ -195,12 +195,12 @@
 			*												"callback_url": "http://example.com/bots/callback"
 			*											}
 			*  
-		*/
+    */
 		public function botCreate($groupId,$strBotName,$strCallBackUrl = false,$strAvatarUrl = false) {
 			if (($strAvatarUrl !== false) && (stripos($strAvatarUrl,"i.groupme.com") === false)) {
 				// Upload image URL to the GroupMe image service and use that URL instead
 				$strAvatarUrl = $this->uploadImage($strAvatarUrl);
-			}
+      }
 			
 			$arrPayload = array(
 			"bot"			=> array (
@@ -213,7 +213,7 @@
 			$postUrl = $this->baseUrl."/bots?token={$this->token}";
 			$r = json_decode($this->apiPost($postUrl,$arrPayload),true);
 			return $r['response']['bot']['bot_id'];
-		}
+    }
 		
 		/**
 			*  Create a new group
@@ -226,13 +226,13 @@
 			*  @return 					Status 201 (Created)
 			*  								Example return array here: https://dev.groupme.com/docs/v3#groups_create
 			*  
-		*/
+    */
 		public function groupCreate($strGroupName,$strGroupDescription = null, $boolShare = null,$strImageUrl = null) {
 			if (!$groupId || $strBotName ) { return false; }
 			if ($strImageUrl && (stripos($strImageUrl,"i.groupme.com") === false)) {
 				// Upload image URL to the GroupMe image service and use that URL instead
 				$strImageUrl = $this->uploadImage($strImageUrl);
-			}
+      }
 			$arrPayload = array(
 			"name"			=> $strGroupName,
 			"description"	=> $strGroupDescription,
@@ -241,7 +241,7 @@
 			);
 			$postUrl = $this->baseUrl."/groups?token={$this->token}";
 			return json_decode($this->apiPost($postUrl,$arrPayload),true);
-		}		
+    }		
 		
 		/**
 			*  Updates an existing group's information
@@ -255,29 +255,29 @@
 			*  @return 				(array)	Full information about a group, including members and messages.
 			*											Example of return: https://dev.groupme.com/docs/v3#groups_update
 			*  
-		*/
+    */
 		public function groupUpdate($groupId, $strGroupName = false,$boolShare = null,$strImageUrl = false, $boolOfficeMode = null) {
 			if ((empty($strImageUrl) === false) && (stripos($strImageUrl,"i.groupme.com") === false)) {
 				// Upload image URL to the GroupMe image service and use that URL instead
 				$strImageUrl = $this->uploadImage($strImageUrl);
-			}
+      }
 			if ($strGroupName !== false) {
 				$arrPayload['name'] = $strGroupName;
-			}		
+      }		
 			if ($boolShare !== null) { // null default because this parameter can be true/false
 				$arrPayload['share'] = $boolShare;
-			}			
+      }			
 			if ($strImageUrl !== false) {
 				$arrPayload['image_url'] = $strImageUrl;
-			}
+      }
 			if ($boolOfficeMode !== null) { // null default because this parameter can be true/false
 				$arrPayload['office_mode'] = $boolOfficeMode;
-			}
+      }
 			
 			$postUrl = $this->baseUrl."/groups/$groupId/update?token={$this->token}";
 			$r = json_decode($this->apiPost($postUrl,$arrPayload),true);
 			return $r;
-		}
+    }
 		
 		/**
 			*  Set Office Mode (on/off) for a particular group.
@@ -288,11 +288,11 @@
 			*  
 			*  @return 				(array)	Returns the same info on a group as $this->groupUpdate()
 			*  
-		*/
+    */
 		public function groupSetOfficeMode($groupId,$boolOfficeMode = false) {
 			if ($groupId === false) {
 				return false;
-			}
+      }
 			
 			$arrPayload = array(
 			'office_mode' => $boolOfficeMode
@@ -301,7 +301,7 @@
 			$postUrl = $this->baseUrl."/groups/$groupId/update?token={$this->token}";
 			$r = json_decode($this->apiPost($postUrl,$arrPayload),true);
 			return $r;
-		}
+    }
 		
 		
 		/**
@@ -322,12 +322,12 @@
 			*								}
 			*							]
 			*  
-		*/
+    */
 		public function getBots() {
 			$getUrl = $this->baseUrl."/bots?token={$this->token}";
 			$r = json_decode($this->apiGet($getUrl),true);
 			return $r;
-		}
+    }
 		
 		/**
 			*  Get details of a particular group.
@@ -337,12 +337,12 @@
 			*  @return 	(array)	Information about the group.
 			*  							Example here: https://dev.groupme.com/docs/v3#groups_show
 			*  
-		*/
+    */
 		public function getGroup($groupId) {
 			$getUrl = $this->baseUrl."/groups/".$groupId."?token={$this->token}";
 			$r = json_decode($this->apiGet($getUrl),true);
 			return $r;
-		}
+    }
 		
 		/**
 			*  Get the member_id for a particular user. This is only used in calls to remove a member.
@@ -352,16 +352,16 @@
 			*  
 			*  @return 		(string)	The member_id of the user
 			*  
-		*/
+    */
 		public function getMemberId($groupId,$userId) {
 			$arrGroup = $this->getGroup($groupId);
 			foreach ($arrGroup['response']['members'] as $k => $v) {
 				if ($v['user_id'] == $userId) {
 					return $v['id'];
-				}
-			}
+        }
+      }
 			return false;
-		}
+    }
 		
 		/**
 			*  Upload an image to the GroupMe Image Service. 
@@ -372,13 +372,13 @@
 			*  @return 			(string)	Full URL of the image hosted on the GroupMe Image Service.
 			*  									Format: http://i.groupme.com/768x1024.jpeg.78805a221a988e79ef3f42d7c5bfd418
 			*  
-		*/
+    */
 		public function uploadImage($strImageURL) {
 			// Set a temporary directory to store the image during processing
 			$tmpDir = $_SERVER['DOCUMENT_ROOT'] . '/tmp/';
 			if (!file_exists($tmpDir)) {
 				mkdir($tmpDir, 0777, true);
-			}
+      }
 			$imgSavePath = $tmpDir . md5($strImageURL) . '.png';
 			file_put_contents($imgSavePath, file_get_contents($strImageURL));
 			
@@ -394,7 +394,7 @@
 			// Delete (unlink) the temprary copy of the image
 			unlink($imgSavePath);
 			return $r['payload']['picture_url'];
-		}
+    }
 		
 		/**
 			*  Force a name change for a user. This is not an official GroupMe API endpoint, but utilizes a hack (remove & re-add) to force a name change.
@@ -405,7 +405,7 @@
 			*  
 			*  @return 		(array)	Same return information as call to $this->groupAddUser()
 			*  
-		*/
+    */
 		public function userForceNameChange($groupId,$userId,$strNewName) {
 			// Remove the user from the group
 			$this->groupRemoveUser($groupId,$userId);
@@ -417,6 +417,6 @@
 			);
 			
 			return $this->groupAddUser($groupId,$arrAddToGroup);			
-		}
-	}
+    }
+  }
 ?>	
