@@ -117,7 +117,7 @@
       *                      )
       *                    )
       *                  );  
-      
+      *
       *  $boolGetResult  (bool)  [optional] Causes the return of this function to be the results of the add
       *  
       *  @return Returns either:
